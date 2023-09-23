@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import aiofiles
 import logging
+import os
 
 from aiohttp import web
 
@@ -42,11 +43,10 @@ async def handle_index_page(request):
 
 async def archive_and_stream(request, delay, photo_path):
     archive_hash = request.match_info.get('archive_hash')
+    directories = next(os.walk(photo_path))[1]
 
-    if archive_hash == '7kna':
-        zip_bytes = await create_zip_archive('7kna', delay, photo_path)
-    elif archive_hash == 'rur2':
-        zip_bytes = await create_zip_archive('rur2', delay, photo_path)
+    if archive_hash in directories:
+        zip_bytes = await create_zip_archive(archive_hash, delay, photo_path)
     else:
         raise web.HTTPNotFound(text='Архив не существует или был удален')
 
