@@ -13,11 +13,10 @@ async def create_zip_archive(directory, delay, photo_path):
     zip_bytes = b''
 
     try:
-        process = await asyncio.create_subprocess_shell(
-            f"cd {photo_path} && zip -r -j - {directory}",
+        process = await asyncio.create_subprocess_exec(
+            'zip', '-r', '-j', '-', f'{photo_path}/{directory}',
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            shell=True,
         )
 
         while True:
@@ -31,23 +30,8 @@ async def create_zip_archive(directory, delay, photo_path):
 
     except (asyncio.CancelledError, Exception):
         logger.debug(f"Download was interrupted")
-        await complete_archiving()
-
+    
     return zip_bytes
-
-
-async def complete_archiving():
-    pid_command = await asyncio.create_subprocess_exec(
-        'pgrep', 'zip',
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-    )
-    stdout, stderr = await pid_command.communicate()
-    pid_output = stdout.decode("utf-8")
-    pids = pid_output.strip().split("\n")
-    for pid in pids:
-        kill_command = await asyncio.create_subprocess_exec('kill', '-9', pid)
-        await kill_command.communicate()
 
 
 async def handle_index_page(request):
