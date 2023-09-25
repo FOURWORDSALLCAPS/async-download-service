@@ -15,10 +15,11 @@ async def create_zip_archive(directory, delay, photo_path):
 
     try:
         process = await asyncio.create_subprocess_exec(
-            'zip', '-r', '-j', '-', f'{photo_path}/{directory}',
+            'zip', '-r', '-', f'{photo_path}/{directory}',
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-        )
+            cwd='.'
+	)
 
         while True:
             chunk = await process.stdout.read(500 * 1024)
