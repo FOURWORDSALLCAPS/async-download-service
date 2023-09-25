@@ -19,8 +19,8 @@ async def create_zip_archive(directory, delay, photo_path):
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             cwd='.'
-	)
-
+        )
+    
         while True:
             chunk = await process.stdout.read(500 * 1024)
             if not chunk:
@@ -30,9 +30,14 @@ async def create_zip_archive(directory, delay, photo_path):
             zip_bytes += chunk
             logger.debug(f"Sending archive chunk ...")
 
-    except (asyncio.CancelledError, Exception):
+    except asyncio.CancelledError:
         logger.debug(f"Download was interrupted")
-    
+        raise
+    except (KeyboardInterrupt, IndexError, BaseException):
+        process.kill()
+    finally:
+        process.kill()
+
     return zip_bytes
 
 
